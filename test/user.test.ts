@@ -172,3 +172,39 @@ describe("PATCH /api/users/current", () => {
     expect(await bcrypt.compare("success", user.password)).toBe(true);
   });
 });
+
+//TEST LOGOUT USER
+describe("DELETE /api/users/current", () => {
+  beforeEach(async () => {
+    await UserTest.create();
+  });
+
+  afterEach(async () => {
+    await UserTest.delete();
+  });
+
+  // TEST LOGOUT USER SUCCESS
+  it("should be able to logout", async () => {
+    const response = await supertest(web)
+      .delete("/api/users/current")
+      .set("X-API-TOKEN", "test");
+
+    logger.debug(response.body);
+    expect(response.status).toBe(200);
+    expect(response.body.data).toBe("OK");
+
+    const user = await UserTest.get();
+    expect(user.token).toBeNull();
+  });
+
+  // TEST LOGOUT USER FAILED
+  it("should reject logout user if token is wrong", async () => {
+    const response = await supertest(web)
+      .delete("/api/users/current")
+      .set("X-API-TOKEN", "wrong");
+
+    logger.debug(response.body);
+    expect(response.status).toBe(401);
+    expect(response.body.errors).toBeDefined();
+  });
+});

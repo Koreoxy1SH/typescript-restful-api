@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { PrismaClient, User } from "@prisma/client";
 import { prismaClient } from "../application/database";
 import { ResponseError } from "../error/response-error";
 import {
@@ -100,6 +100,20 @@ export class UserService {
         username: user.username,
       },
       data: user,
+    });
+
+    return toUserResponse(result);
+  }
+
+  // LOGOUT USER
+  static async logout(user: User): Promise<UserResponse> {
+    const result = await prismaClient.user.update({
+      where: {
+        username: user.username,
+      },
+      data: {
+        token: null,
+      },
     });
 
     return toUserResponse(result);
